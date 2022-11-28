@@ -92,6 +92,8 @@ def problem2(data: bytes) -> bytes:
     >>> problem2(bytes.fromhex('0101010101010101010101010101010110101010101010101010101010101010')).hex()
     '01010101010101010101010101010101'
     """
+    unpadded = data[:-data[-1]]
+    return unpadded
 
 
 def problem3(plaintext: bytes, key: bytes) -> bytes:
@@ -522,3 +524,4 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 #    sys.stdout.buffer.write(simple_bson.dumps(solutions))
 #print(problem1(b"\\x01"))
 print(problem1(b"\\x01").hex())
+print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
