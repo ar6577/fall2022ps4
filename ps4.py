@@ -4,6 +4,10 @@
 import functools
 #import simple_bson
 import sys
+import base64
+import hashlib
+from Crypto.Cipher import AES
+from Crypto import Random
 
 
 BLOCK_SIZE_BYTES = 16
@@ -56,9 +60,10 @@ def problem1(data: bytes) -> bytes:
 
 
     paddedmessage = data + bytearray([pl for i in range(pl)])
-    print(data)
-    print(pl)
-    print(paddedmessage)
+    print('plaintext',data)
+    print('plaintext length', len(data))
+    print('length of padding',pl)
+    print('padded msg',paddedmessage)
     return paddedmessage
 
 
@@ -186,6 +191,16 @@ def problem3(plaintext: bytes, key: bytes) -> bytes:
     >>> problem3(b"\\x00" * 32, b"\\x00" * 16).hex()
     '66e94bd4ef8a2c3b884cfa59ca342b2e66e94bd4ef8a2c3b884cfa59ca342b2e0143db63ee66b0cdff9f69917680151e'
     """
+    paddedpt = problem1(plaintext)
+    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
+
+    KEY = sha256(passphrase).digest()  # returns 256 bit key
+    cipher = AES.new(KEY, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
+    cipherblocks = cipher.encrypt(paddedpt).encode('base64')
+    ciphertext = bytes(cipherblocks)
+    return ciphertext
+
+
 
 
 def problem4(ciphertext: bytes, key: bytes) -> bytes:
@@ -523,5 +538,6 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 #    solutions = {k: globals()[k](**v) for k, v in inputs.items()}
 #    sys.stdout.buffer.write(simple_bson.dumps(solutions))
 #print(problem1(b"\\x01"))
-print(problem1(b"\\x01").hex())
-print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
+#print(problem1(b"\\x01").hex())
+#print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
+print(problem3(b"\\x00" * 17, b"\\x00" * 16))
