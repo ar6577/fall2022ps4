@@ -6,8 +6,9 @@ import functools
 import sys
 import base64
 import hashlib
+#import pycrypto
 from Crypto.Cipher import AES
-from Crypto import Random
+#from Crypto import Random
 
 
 BLOCK_SIZE_BYTES = 16
@@ -196,7 +197,9 @@ def problem3(plaintext: bytes, key: bytes) -> bytes:
 
     KEY = sha256(passphrase).digest()  # returns 256 bit key
     cipher = AES.new(KEY, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
-    cipherblocks = cipher.encrypt(paddedpt).encode('base64')
+    for i in range(len(splitblocks)):
+        cipherblocks = cipher.encrypt(splitblocks[i])
+        #.encode('base64')
     ciphertext = bytes(cipherblocks)
     return ciphertext
 
