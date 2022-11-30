@@ -1,12 +1,12 @@
-
 import functools
-#import simple_bson
+# import simple_bson
 import sys
 import base64
 import hashlib
-#import pycrypto
+# import pycrypto
 from Crypto.Cipher import AES
-#from Crypto import Random
+
+# from Crypto import Random
 
 
 BLOCK_SIZE_BYTES = 16
@@ -54,15 +54,14 @@ def problem1(data: bytes) -> bytes:
     >>> problem1(b"\\x01" * 16).hex()
     '0101010101010101010101010101010110101010101010101010101010101010'
     """
-    pl = BLOCK_SIZE_BYTES-len(data)%BLOCK_SIZE_BYTES
-    #paddedmessage = chr(pl) * pl
-
+    pl = BLOCK_SIZE_BYTES - len(data) % BLOCK_SIZE_BYTES
+    # paddedmessage = chr(pl) * pl
 
     paddedmessage = data + bytearray([pl for i in range(pl)])
-    print('plaintext',data)
+    print('plaintext', data)
     print('plaintext length', len(data))
-    print('length of padding',pl)
-    print('padded msg',paddedmessage)
+    print('length of padding', pl)
+    print('padded msg', paddedmessage)
     return paddedmessage
 
 
@@ -191,21 +190,18 @@ def problem3(plaintext: bytes, key: bytes) -> bytes:
     '66e94bd4ef8a2c3b884cfa59ca342b2e66e94bd4ef8a2c3b884cfa59ca342b2e0143db63ee66b0cdff9f69917680151e'
     """
     paddedpt = problem1(plaintext)
-    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
+    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt), 16)]
     print('splitblocks', splitblocks)
 
-
-    #KEY = sha256(passphrase).digest()  # returns 256 bit key
+    # KEY = sha256(passphrase).digest()  # returns 256 bit key
     cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
     cipherblocks = b''
     for block in splitblocks:
         cipherblocks += cipher.encrypt(block)
         print('cipherblock', cipherblocks)
-        #.encode('base64')
+        # .encode('base64')
     ciphertext = bytes(cipherblocks)
     return ciphertext
-
-
 
 
 def problem4(ciphertext: bytes, key: bytes) -> bytes:
@@ -260,6 +256,19 @@ def problem4(ciphertext: bytes, key: bytes) -> bytes:
     >>> problem4(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e66e94bd4ef8a2c3b884cfa59ca342b2e0143db63ee66b0cdff9f69917680151e'), b'\\x00' * 16).hex()
     '0000000000000000000000000000000000000000000000000000000000000000'
     """
+    # paddedpt = problem1(cyphertext)
+    splitblocks = [ciphertext[i:i + 16] for i in range(0, len(ciphertext), 16)]
+    print('splitblocks', splitblocks)
+
+    # KEY = sha256(passphrase).digest()  # returns 256 bit key
+    cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
+    ptblocks = b''
+    for block in splitblocks:
+        ptblocks += cipher.decrypt(block)
+        print('ptblocks', ptblocks)
+        # .encode('base64')
+    plaintext = bytes(ptblocks)
+    return problem2(plaintext)
 
 
 def xor(*args: bytes) -> bytes:
@@ -331,9 +340,8 @@ def problem5(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     """
     print('problem 5---------')
     paddedpt = problem1(plaintext)
-    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
+    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt), 16)]
     print('splitblocks', splitblocks)
-
 
     cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
     cipherblocks = b''
@@ -341,7 +349,7 @@ def problem5(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     nextiv = iv
     print('iv', iv)
     for block in splitblocks:
-        xorsplitblock = xor(nextiv,block)
+        xorsplitblock = xor(nextiv, block)
         print('xorsplitblock', xorsplitblock)
         nextiv = cipher.encrypt(xorsplitblock)
         print('nextiv', nextiv)
@@ -409,6 +417,31 @@ def problem6(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
     >>> problem6(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2ef795bd4a52e29ed713d313fa20e98dbc5c047616756fdc1c32e0df6e8c59bb2a'), b"\\x00" * 16, b"\\x00" * 16).hex()
     '0000000000000000000000000000000000000000000000000000000000000000'
     """
+    print('problem 6---------')
+    #paddedpt = problem1(plaintext)
+    splitblocks = [ciphertext[i:i + 16] for i in range(0, len(ciphertext), 16)]
+    print('splitblocks', splitblocks)
+
+    cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
+    ptblock = b''
+    xorsplitblock = b''
+    plaintext = b''
+    nextiv = iv
+    print('iv', iv)
+    for block in splitblocks:
+        ptblock = cipher.decrypt(block)
+        print('--ptblock    ', ptblock)
+        print('currentiv    ', nextiv)
+        xorsplitblock = xor(nextiv, ptblock)
+        print('xorsplitblock', xorsplitblock)
+        plaintext += xorsplitblock
+        print('plaintext',plaintext)
+        nextiv = block
+        print('nextiv       ', nextiv)
+
+
+    plaintext1 = bytes(plaintext)
+    return problem2(plaintext)
 
 
 def problem7(iv: bytes) -> bytes:
@@ -448,7 +481,7 @@ def problem7(iv: bytes) -> bytes:
     """
     print('problem 7---------')
 
-    splitiv = [iv[i:i + 8] for i in range(0, len(iv),8)]
+    splitiv = [iv[i:i + 8] for i in range(0, len(iv), 8)]
     print('splitiv', splitiv)
     if splitiv[1] != b"\xff" * 8:
         counter = int.from_bytes(splitiv[1], "big")
@@ -458,13 +491,11 @@ def problem7(iv: bytes) -> bytes:
         counter = 0
         inccounter = 0
 
-
     splitiv[1] = inccounter.to_bytes(8, 'big')
-    print('splitiv[1]', splitiv[1] )
+    print('splitiv[1]', splitiv[1])
     nextiv = splitiv[0] + splitiv[1]
 
     return nextiv
-
 
 
 def problem8(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
@@ -527,9 +558,8 @@ def problem8(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     """
     print('problem 8---------')
     paddedpt = problem1(plaintext)
-    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
+    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt), 16)]
     print('splitblocks', splitblocks)
-
 
     cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
     cipherblocks = b''
@@ -542,7 +572,7 @@ def problem8(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
         print('cipheriv', cipheriv)
         nextiv = problem7(nextiv)
         print('nextiv', nextiv)
-        xorsplitblock = xor(cipheriv,block)
+        xorsplitblock = xor(cipheriv, block)
         print('xorsplitblock', xorsplitblock)
 
         cipherblocks += xorsplitblock
@@ -550,7 +580,6 @@ def problem8(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
 
     ciphertext = bytes(cipherblocks)
     return ciphertext
-
 
 
 def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
@@ -599,52 +628,70 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 
     Examples
     --------
-    >>> problem9(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e58e2fccefa7e3061367f1d57a4e7455a1398cade70a6b382e338d2a961a2ee68'), b"\\x00" * 16, b"\\x00" * 16).hex()
-    '0000000000000000000000000000000000000000000000000000000000000000'
+    >>> problem9(bytes.fromhex('
+    66e94bd4
+    ef8a2c3b
+    884cfa59
+    ca342b2e
+    58e2fcce
+    fa7e3061
+    367f1d57
+    a4e7455a
+    1398cade
+    70a6b382
+    e338d2a9
+    61a2ee68'), b"\\x00" * 16, b"\\x00" * 16).hex()
+    '
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000'
+
     """
     print('problem 9---------')
     print('ciphertext  ', ciphertext)
-    #paddedct = problem1(ciphertext)
-    #print('paddedct', paddedct)
-    #splitblocks = [paddedct[i:i + 16] for i in range(0, len(paddedct),16)]
+    # paddedct = problem1(ciphertext)
+    # print('paddedct', paddedct)
     splitblocks = [ciphertext[i:i + 16] for i in range(0, len(ciphertext), 16)]
-
-    print('splitblocks ', splitblocks)
-
+    # splitblocks = [ciphertext[i:i + 16] for i in range(0, len(ciphertext), 16)]
 
     cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
     ptblocks = b''
     xorsplitblock = b''
     nextiv = iv
-    print('iv', iv)
+
     for block in splitblocks:
-        print('currentiv', nextiv)
+        print('currentiv    ', nextiv)
         cipheriv = cipher.encrypt(nextiv)
-        print('cipheriv', cipheriv)
-        print('block   ', block)
+        print('cipheriv     ', cipheriv)
+        print('block        ', block)
 
-        xorsplitblock = xor(cipheriv,block)
+        xorsplitblock = xor(cipheriv, block)
         print('xorsplitblock', xorsplitblock)
-        nextiv = problem7(nextiv)
-        print('nextiv', nextiv)
-
         ptblocks += xorsplitblock
         print('ptblocks', ptblocks)
+        nextiv = problem7(nextiv)
+        print('nextiv', nextiv)
+        print('----------------')
 
     plaintext = bytes(ptblocks)
-    return plaintext
+    return problem2(plaintext)
 
-
-
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    inputs = simple_bson.loads(sys.stdin.buffer.read())
 #    solutions = {k: globals()[k](**v) for k, v in inputs.items()}
 #    sys.stdout.buffer.write(simple_bson.dumps(solutions))
-#print(problem1(b"\\x01"))
-#print(problem1(b"\\x01").hex())
-#print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
-#print('problem3 ciphertext',problem3(b"\x00" * 32, b"\x00" * 16).hex())
-#print('problem5 ciphertext',problem5(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex())
-#print('problem7 nextiv = ',problem7(bytes([x for x in range(1, 9)]) + b"\xff" * 8).hex())
-#problem8(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex()
-print('problem9',problem9(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e58e2fccefa7e3061367f1d57a4e7455a1398cade70a6b382e338d2a961a2ee68'), b"\x00" * 16, b"\x00" * 16).hex())
+# print(problem1(b"\\x01"))
+# print(problem1(b"\\x01").hex())
+# print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
+# print('problem3 ciphertext',problem3(b"\x00" * 32, b"\x00" * 16).hex())
+# print('problem5 ciphertext',problem5(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex())
+# print('problem7 nextiv = ',problem7(bytes([x for x in range(1, 9)]) + b"\xff" * 8).hex())
+# problem8(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex()
+# print('problem 4',problem4(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e66e94bd4ef8a2c3b884cfa59ca342b2e0143db63ee66b0cdff9f69917680151e'), b'\x00' * 16).hex())
+# print('problem9',problem9(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e58e2fccefa7e3061367f1d57a4e7455a1398cade70a6b382e338d2a961a2ee68'), b"\x00" * 16, b"\x00" * 16).hex())
+print(problem6(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2ef795bd4a52e29ed713d313fa20e98dbc5c047616756fdc1c32e0df6e8c59bb2a'), b"\x00" * 16, b"\x00" * 16).hex())
