@@ -1,5 +1,3 @@
-#!/usr/env/bin python3
-# -*- coding: utf-8 -*-
 
 import functools
 #import simple_bson
@@ -194,11 +192,15 @@ def problem3(plaintext: bytes, key: bytes) -> bytes:
     """
     paddedpt = problem1(plaintext)
     splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
+    print('splitblocks', splitblocks)
 
-    KEY = sha256(passphrase).digest()  # returns 256 bit key
-    cipher = AES.new(KEY, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
-    for i in range(len(splitblocks)):
-        cipherblocks = cipher.encrypt(splitblocks[i])
+
+    #KEY = sha256(passphrase).digest()  # returns 256 bit key
+    cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
+    cipherblocks = b''
+    for block in splitblocks:
+        cipherblocks += cipher.encrypt(block)
+        print('cipherblock', cipherblocks)
         #.encode('base64')
     ciphertext = bytes(cipherblocks)
     return ciphertext
@@ -327,6 +329,27 @@ def problem5(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     >>> problem5(b"\\x00" * 32, b"\\x00" * 16, b"\\x00" * 16).hex()
     '66e94bd4ef8a2c3b884cfa59ca342b2ef795bd4a52e29ed713d313fa20e98dbc5c047616756fdc1c32e0df6e8c59bb2a'
     """
+    print('problem 5---------')
+    paddedpt = problem1(plaintext)
+    splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
+    print('splitblocks', splitblocks)
+
+
+    cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
+    cipherblocks = b''
+    xorsplitblock = b''
+    nextiv = iv
+    print('iv', iv)
+    for block in splitblocks:
+        xorsplitblock = xor(nextiv,block)
+        print('xorsplitblock', xorsplitblock)
+        nextiv = cipher.encrypt(xorsplitblock)
+        print('nextiv', nextiv)
+        cipherblocks += cipher.encrypt(xorsplitblock)
+        print('cipherblock', cipherblocks)
+
+    ciphertext = bytes(cipherblocks)
+    return ciphertext
 
 
 def problem6(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
@@ -543,4 +566,5 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 #print(problem1(b"\\x01"))
 #print(problem1(b"\\x01").hex())
 #print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
-print(problem3(b"\\x00" * 17, b"\\x00" * 16))
+print('problem3 ciphertext',problem3(b"\x00" * 32, b"\x00" * 16).hex())
+print('problem5 ciphertext',problem5(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex())
