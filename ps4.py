@@ -452,11 +452,13 @@ def problem7(iv: bytes) -> bytes:
     print('splitiv', splitiv)
     if splitiv[1] != b"\xff" * 8:
         counter = int.from_bytes(splitiv[1], "big")
+        print('counter', counter)
+        inccounter = counter + 1
     else:
         counter = 0
-    print('counter', counter)
-    inccounter = counter + 1
-    print('inccounter', inccounter)
+        inccounter = 0
+
+
     splitiv[1] = inccounter.to_bytes(16, 'big')
     print('splitiv[1]', splitiv[1] )
     nextiv = splitiv[0] + splitiv[1]
@@ -585,4 +587,4 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 #print(problem2(bytes.fromhex('010f0f0f0f0f0f0f0f0f0f0f0f0f0f0f')).hex())
 #print('problem3 ciphertext',problem3(b"\x00" * 32, b"\x00" * 16).hex())
 #print('problem5 ciphertext',problem5(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex())
-print('problem7 nextiv = ',problem7(bytes([x for x in range(1, 9)]) + b"\x00" * 8).hex())
+print('problem7 nextiv = ',problem7(bytes([x for x in range(1, 9)]) + b"\xff" * 8).hex())
