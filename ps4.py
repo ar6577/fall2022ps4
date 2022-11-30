@@ -459,7 +459,7 @@ def problem7(iv: bytes) -> bytes:
         inccounter = 0
 
 
-    splitiv[1] = inccounter.to_bytes(16, 'big')
+    splitiv[1] = inccounter.to_bytes(8, 'big')
     print('splitiv[1]', splitiv[1] )
     nextiv = splitiv[0] + splitiv[1]
 
