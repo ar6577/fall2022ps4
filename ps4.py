@@ -603,11 +603,13 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
     '0000000000000000000000000000000000000000000000000000000000000000'
     """
     print('problem 9---------')
-    #paddedpt = problem1(plaintext)
-    #splitblocks = [paddedpt[i:i + 16] for i in range(0, len(paddedpt),16)]
-    #print('splitblocks', splitblocks)
-    splitblocks = [ciphertext[i:i + 16] for i in range(0, len(ciphertext),16)]
-    print('splitblocks', splitblocks)
+    print('ciphertext  ', ciphertext)
+    #paddedct = problem1(ciphertext)
+    #print('paddedct', paddedct)
+    #splitblocks = [paddedct[i:i + 16] for i in range(0, len(paddedct),16)]
+    splitblocks = [ciphertext[i:i + 16] for i in range(0, len(ciphertext), 16)]
+
+    print('splitblocks ', splitblocks)
 
 
     cipher = AES.new(key, AES.MODE_ECB)  # creates a AES-256 instance using ECB mode
@@ -619,10 +621,12 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
         print('currentiv', nextiv)
         cipheriv = cipher.encrypt(nextiv)
         print('cipheriv', cipheriv)
-        nextiv = problem7(nextiv)
-        print('nextiv', nextiv)
+        print('block   ', block)
+
         xorsplitblock = xor(cipheriv,block)
         print('xorsplitblock', xorsplitblock)
+        nextiv = problem7(nextiv)
+        print('nextiv', nextiv)
 
         ptblocks += xorsplitblock
         print('ptblocks', ptblocks)
@@ -643,4 +647,4 @@ def problem9(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 #print('problem5 ciphertext',problem5(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex())
 #print('problem7 nextiv = ',problem7(bytes([x for x in range(1, 9)]) + b"\xff" * 8).hex())
 #problem8(b"\x00" * 32, b"\x00" * 16, b"\x00" * 16).hex()
-problem9(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e58e2fccefa7e3061367f1d57a4e7455a1398cade70a6b382e338d2a961a2ee68'), b"\x00" * 16, b"\x00" * 16).hex()
+print('problem9',problem9(bytes.fromhex('66e94bd4ef8a2c3b884cfa59ca342b2e58e2fccefa7e3061367f1d57a4e7455a1398cade70a6b382e338d2a961a2ee68'), b"\x00" * 16, b"\x00" * 16).hex())
